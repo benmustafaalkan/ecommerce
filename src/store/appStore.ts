@@ -96,6 +96,10 @@ export const useAppStore = create<AppState>((set) => ({
       calibratedImageBlob: null,
       calibratedImageDataUrl: null,
       isCalibrated: false,
+      isGenerating: false,
+      generatedImages: [],
+      sessionHistory: [],
+      error: null,
     }),
 
   setCalibration: (point, rgb, blob, dataUrl) =>

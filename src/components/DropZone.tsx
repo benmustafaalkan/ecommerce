@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 import { useAppStore } from '../store/appStore';
 import { validateFile, fileToDataUrl } from '../utils/imageHelpers';
 import { UploadCloud, Image as ImageIcon, AlertCircle, X } from 'lucide-react';
@@ -20,35 +20,35 @@ export const DropZone = () => {
     try {
       const dataUrl = await fileToDataUrl(file);
       setOriginalImage(file, dataUrl);
-    } catch (err) {
+    } catch {
       setLocalError('Dosya okunurken bir hata oluştu.');
     }
   };
 
-  const onDragOver = useCallback((e: React.DragEvent) => {
+  const onDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(true);
-  }, []);
+  };
 
-  const onDragLeave = useCallback((e: React.DragEvent) => {
+  const onDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-  }, []);
+  };
 
-  const onDrop = useCallback((e: React.DragEvent) => {
+  const onDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
     
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      handleFile(e.dataTransfer.files[0]);
+      void handleFile(e.dataTransfer.files[0]);
     }
-  }, []);
+  };
 
-  const onFileInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const onFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      handleFile(e.target.files[0]);
+      void handleFile(e.target.files[0]);
     }
-  }, []);
+  };
 
   return (
     <div className="w-full max-w-2xl mx-auto">

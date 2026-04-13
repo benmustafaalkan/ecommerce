@@ -1,6 +1,28 @@
-import { useAppStore } from '../store/appStore';
-import { PRODUCT_FORM_PROMPTS, SCENE_PROMPTS, buildPrompt } from '../constants/prompts';
+import { useAppStore, type AspectRatio, type ProductForm, type SceneStyle } from '../store/appStore';
+import { buildPrompt } from '../constants/prompts';
 import { ArrowRight, Info } from 'lucide-react';
+
+const productFormOptions: Array<{ value: ProductForm; label: string }> = [
+  { value: 'flat_lay', label: 'Düz Zemin (Flat Lay)' },
+  { value: 'folded', label: 'Katlı (Folded)' },
+  { value: 'hanging', label: 'Askıda (Hanging)' },
+  { value: 'mannequin', label: 'Görünmez Manken (Ghost Mannequin)' },
+  { value: 'styled_flat_lay', label: 'Kombinli Düz Zemin (Styled Flat Lay)' },
+];
+
+const sceneStyleOptions: Array<{ value: SceneStyle; label: string }> = [
+  { value: 'minimalist_studio', label: 'Minimalist Studio' },
+  { value: 'scandinavian', label: 'İskandinav Ev' },
+  { value: 'cafe', label: 'Kahve Dükkanı' },
+  { value: 'outdoor', label: 'Doğa / Outdoor' },
+  { value: 'hotel', label: 'Otel Odası' },
+  { value: 'loft', label: 'Endüstriyel Loft' },
+  { value: 'beach', label: 'Plaj / Sahil' },
+  { value: 'office', label: 'Modern Ofis' },
+];
+
+const aspectRatioOptions: AspectRatio[] = ['1:1', '4:5', '3:4', '9:16', '16:9'];
+const resolutionOptions: Array<'1K' | '2K' | '4K'> = ['1K', '2K', '4K'];
 
 export const ParameterStep = () => {
   const { 
@@ -9,7 +31,6 @@ export const ParameterStep = () => {
     sceneStyle, 
     aspectRatio, 
     resolution, 
-    outputFormat,
     customRequest,
     updateParameters,
     setStep
@@ -55,14 +76,14 @@ export const ParameterStep = () => {
               <label className="text-sm font-medium text-white/80">Ürün Formu</label>
               <select 
                 value={productForm}
-                onChange={(e) => updateParameters({ productForm: e.target.value as any })}
+                onChange={(e) => updateParameters({ productForm: e.target.value as ProductForm })}
                 className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-colors appearance-none"
               >
-                <option value="flat_lay">Düz Zemin (Flat Lay)</option>
-                <option value="folded">Katlı (Folded)</option>
-                <option value="hanging">Askıda (Hanging)</option>
-                <option value="mannequin">Görünmez Manken (Ghost Mannequin)</option>
-                <option value="styled_flat_lay">Kombinli Düz Zemin (Styled Flat Lay)</option>
+                {productFormOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -71,17 +92,14 @@ export const ParameterStep = () => {
               <label className="text-sm font-medium text-white/80">Sahne Stili</label>
               <select 
                 value={sceneStyle}
-                onChange={(e) => updateParameters({ sceneStyle: e.target.value as any })}
+                onChange={(e) => updateParameters({ sceneStyle: e.target.value as SceneStyle })}
                 className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-colors appearance-none"
               >
-                <option value="minimalist_studio">Minimalist Studio</option>
-                <option value="scandinavian">İskandinav Ev</option>
-                <option value="cafe">Kahve Dükkanı</option>
-                <option value="outdoor">Doğa / Outdoor</option>
-                <option value="hotel">Otel Odası</option>
-                <option value="loft">Endüstriyel Loft</option>
-                <option value="beach">Plaj / Sahil</option>
-                <option value="office">Modern Ofis</option>
+                {sceneStyleOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
@@ -91,10 +109,10 @@ export const ParameterStep = () => {
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-white/80">Çıktı Oranı</label>
               <div className="flex flex-wrap gap-2">
-                {['1:1', '4:5', '3:4', '9:16', '16:9'].map(ratio => (
+                {aspectRatioOptions.map((ratio) => (
                   <button
                     key={ratio}
-                    onClick={() => updateParameters({ aspectRatio: ratio as any })}
+                    onClick={() => updateParameters({ aspectRatio: ratio })}
                     className={`px-3 py-2 rounded-lg text-xs font-medium transition-colors border ${
                       aspectRatio === ratio 
                         ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' 
@@ -111,10 +129,10 @@ export const ParameterStep = () => {
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-white/80">Çözünürlük</label>
               <div className="flex gap-2">
-                {['1K', '2K', '4K'].map(res => (
+                {resolutionOptions.map((res) => (
                   <button
                     key={res}
-                    onClick={() => updateParameters({ resolution: res as any })}
+                    onClick={() => updateParameters({ resolution: res })}
                     className={`flex-1 py-2 rounded-lg text-xs font-medium transition-colors border ${
                       resolution === res 
                         ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' 

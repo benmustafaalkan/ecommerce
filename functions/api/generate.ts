@@ -1,4 +1,13 @@
-export async function onRequestPost({ request, env }: any) {
+interface Env {
+  FAL_KEY?: string;
+}
+
+interface RequestContext {
+  request: Request;
+  env: Env;
+}
+
+export async function onRequestPost({ request, env }: RequestContext) {
   const { FAL_KEY } = env;
   
   if (!FAL_KEY) {
@@ -37,8 +46,11 @@ export async function onRequestPost({ request, env }: any) {
       }
     });
     
-  } catch (error: any) {
-    return new Response(JSON.stringify({ error: 'Internal Server Error', details: error.message }), {
+  } catch (error: unknown) {
+    return new Response(JSON.stringify({
+      error: 'Internal Server Error',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });
