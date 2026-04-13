@@ -1,5 +1,6 @@
 {
-  "name": "myapp",
+  "name": "tekstil-ai-studio",
+  "description": "Tekstil urunleri icin AI destekli e-ticaret gorsel olusturma araci.",
   "private": true,
   "version": "0.0.0",
   "type": "module",
