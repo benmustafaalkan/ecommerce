@@ -1,8 +1,6 @@
 import { useAppStore } from '../store/appStore';
 import { Upload, Crosshair, Settings, Sparkles } from 'lucide-react';
-import { clsx } from 'clsx'; // I will install clsx and tailwind-merge if needed, but I can just use template literals. But wait, I will use tailwind-merge with clsx.
 
-// Actually, I'll just use manual template literals to avoid another dependency.
 const steps = [
   { id: 1, title: 'Yükle', icon: Upload },
   { id: 2, title: 'Kalibrasyon', icon: Crosshair },

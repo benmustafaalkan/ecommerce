@@ -1,4 +1,4 @@
-import { ProductForm, SceneStyle } from '../store/appStore';
+import type { ProductForm, SceneStyle } from '../store/appStore';
 
 export const SCENE_PROMPTS: Record<SceneStyle, string> = {
   minimalist_studio: 'on a clean white surface in a minimalist photography studio with soft diffused lighting from above and a plain light gray background',

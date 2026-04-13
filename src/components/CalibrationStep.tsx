@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAppStore } from '../store/appStore';
 import { calibrateImage } from '../utils/calibration';
-import { Check, RefreshCw, AlertTriangle, ArrowRight } from 'lucide-react';
+import { RefreshCw, AlertTriangle, ArrowRight } from 'lucide-react';
 
 export const CalibrationStep = () => {
   const { 
@@ -31,8 +31,6 @@ export const CalibrationStep = () => {
 
     const img = new Image();
     img.onload = () => {
-      // Set canvas display size to fit container width while maintaining aspect ratio
-      const containerWidth = containerRef.current?.clientWidth || 800;
       const ratio = img.height / img.width;
       
       // Actual internal resolution vs display size
@@ -75,7 +73,7 @@ export const CalibrationStep = () => {
       try {
         const area = ctx.getImageData(x - 2, y - 2, 5, 5);
         setLoupeData(area);
-      } catch (e) {
+      } catch {
         // Ignore cross-origin canvas errors if any
       }
     }
@@ -104,8 +102,8 @@ export const CalibrationStep = () => {
     try {
       const result = await calibrateImage(canvas.toDataURL('image/png'), { x, y });
       setCalibration({x, y}, result.rgb, result.blob, result.dataUrl);
-    } catch (err: any) {
-      setError(err.message || 'Kalibrasyon hatası');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Kalibrasyon hatası');
     } finally {
       setIsProcessing(false);
     }

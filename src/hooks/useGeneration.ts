@@ -1,7 +1,15 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useAppStore } from '../store/appStore';
 import { buildPrompt } from '../constants/prompts';
 import { CONFIG } from '../constants/config';
+
+interface GeneratedImageResponse {
+  url: string;
+}
+
+interface GenerateResponse {
+  images?: GeneratedImageResponse[];
+}
 
 export const useGeneration = () => {
   const { 
@@ -20,7 +28,7 @@ export const useGeneration = () => {
 
   const [progressText, setProgressText] = useState('');
 
-  const generate = async (numImages: number = 1) => {
+  const generate = useCallback(async (numImages: number = 1) => {
     if (!calibratedImageDataUrl || isGenerating) return;
 
     setGenerating(true);
@@ -63,13 +71,13 @@ export const useGeneration = () => {
         throw new Error('Sunucu hatası veya içerik güvenlik filtresine takıldı.');
       }
 
-      const generateData = await generateRes.json();
+      const generateData: GenerateResponse = await generateRes.json();
       
       if (!generateData.images || !Array.isArray(generateData.images)) {
         throw new Error('Üretim sonucunda görüntü bulunamadı.');
       }
 
-      const newImages = generateData.images.map((img: any) => ({
+      const newImages = generateData.images.map((img) => ({
         id: crypto.randomUUID(),
         url: img.url,
         prompt,
@@ -78,11 +86,23 @@ export const useGeneration = () => {
 
       addGeneratedImages(newImages);
 
-    } catch (err: any) {
-      setError(err.message || 'Bilinmeyen bir hata oluştu');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Bilinmeyen bir hata oluştu');
       setGenerating(false);
     }
-  };
+  }, [
+    addGeneratedImages,
+    aspectRatio,
+    calibratedImageDataUrl,
+    customRequest,
+    isGenerating,
+    outputFormat,
+    productForm,
+    resolution,
+    sceneStyle,
+    setError,
+    setGenerating,
+  ]);
 
   return { generate, progressText };
 };

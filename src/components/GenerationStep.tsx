@@ -22,13 +22,12 @@ export const GenerationStep = () => {
   // Actually, since there's no generate call in step 3, we should trigger it on mount of step 4 if empty.
   useEffect(() => {
     if (generatedImages.length === 0 && !isGenerating && !error) {
-      generate(1);
+      void generate(1);
     }
-  }, []);
+  }, [error, generate, generatedImages.length, isGenerating]);
 
-  const handleDownload = (url: string) => {
-    const timestamp = Date.now();
-    const filename = `urun-${sceneStyle}-${aspectRatio.replace(':', 'x')}-${timestamp}.png`;
+  const handleDownload = (url: string, imageId: string) => {
+    const filename = `urun-${sceneStyle}-${aspectRatio.replace(':', 'x')}-${imageId}.png`;
     downloadImage(url, filename);
   };
 
@@ -97,7 +96,7 @@ export const GenerationStep = () => {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
                       <button 
-                        onClick={() => handleDownload(img.url)}
+                        onClick={() => handleDownload(img.url, img.id)}
                         className="w-full py-3 rounded-xl bg-white text-background font-semibold flex items-center justify-center gap-2 hover:bg-white/90 transform translate-y-4 group-hover:translate-y-0 transition-all shadow-xl"
                       >
                         <Download className="w-5 h-5" />
@@ -123,7 +122,7 @@ export const GenerationStep = () => {
               <div 
                 key={item.id} 
                 className="relative rounded-lg overflow-hidden border border-white/10 cursor-pointer hover:border-primary/50 transition-colors group"
-                onClick={() => handleDownload(item.url)}
+                onClick={() => handleDownload(item.url, item.id)}
               >
                 <img src={item.url} alt="History thumbnail" className="w-full h-auto object-cover" />
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
