@@ -1,3 +1,11 @@
+import {
+  API_LIMITS,
+  consumeRateLimit,
+  getClientIp,
+  jsonResponse,
+  validateGenerateBody,
+} from './_shared';
+
 interface Env {
   FAL_KEY?: string;
 }
@@ -11,14 +19,27 @@ export async function onRequestPost({ request, env }: RequestContext) {
   const { FAL_KEY } = env;
   
   if (!FAL_KEY) {
-    return new Response(JSON.stringify({ error: 'FAL_KEY is not configured on the server.' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    return jsonResponse({ error: 'FAL_KEY is not configured on the server.' }, 500);
   }
 
   try {
-    const body = await request.json();
+    const clientIp = getClientIp(request);
+    const withinRateLimit = consumeRateLimit(
+      'generate',
+      clientIp,
+      API_LIMITS.generateRequestsPerWindow,
+    );
+
+    if (!withinRateLimit) {
+      return jsonResponse({ error: 'Çok fazla üretim isteği. Lütfen tekrar deneyin.' }, 429);
+    }
+
+    const rawBody = await request.json();
+    const validation = validateGenerateBody(rawBody);
+
+    if (!validation.valid) {
+      return jsonResponse({ error: validation.message }, 400);
+    }
 
     const response = await fetch("https://queue.fal.run/fal-ai/nano-banana-pro/edit", {
       method: "POST",
@@ -26,15 +47,12 @@ export async function onRequestPost({ request, env }: RequestContext) {
         "Content-Type": "application/json",
         "Authorization": `Key ${FAL_KEY}`,
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify(validation.value),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      return new Response(JSON.stringify({ error: 'Fal.ai API error', details: errorText }), {
-        status: response.status,
-        headers: { 'Content-Type': 'application/json' }
-      });
+      return jsonResponse({ error: 'Fal.ai API error', details: errorText }, response.status);
     }
 
     const data = await response.text();
@@ -42,17 +60,13 @@ export async function onRequestPost({ request, env }: RequestContext) {
     return new Response(data, {
       headers: { 
         "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*"
       }
     });
     
   } catch (error: unknown) {
-    return new Response(JSON.stringify({
+    return jsonResponse({
       error: 'Internal Server Error',
       details: error instanceof Error ? error.message : 'Unknown error'
-    }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    }, 500);
   }
 }
