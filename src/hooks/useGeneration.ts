@@ -11,8 +11,14 @@ interface GenerateResponse {
   images?: GeneratedImageResponse[];
 }
 
+interface UploadResponse {
+  url?: string;
+  error?: string;
+}
+
 export const useGeneration = () => {
   const { 
+    calibratedImageBlob,
     calibratedImageDataUrl, 
     productForm,
     sceneStyle,
@@ -28,19 +34,37 @@ export const useGeneration = () => {
 
   const [progressText, setProgressText] = useState('');
 
+  const uploadCalibratedImage = useCallback(async (imageBlob: Blob): Promise<string> => {
+    const formData = new FormData();
+    formData.append('file', imageBlob, 'calibrated-image.png');
+
+    const uploadRes = await fetch(CONFIG.UPLOAD_ENDPOINT, {
+      method: 'POST',
+      body: formData,
+    });
+
+    const uploadData: UploadResponse = await uploadRes.json();
+
+    if (!uploadRes.ok || !uploadData.url) {
+      if (uploadRes.status === 429) {
+        throw new Error('Çok fazla upload isteği. Lütfen 1 dakika sonra tekrar deneyin.');
+      }
+
+      throw new Error(uploadData.error || 'Görsel upload edilemedi.');
+    }
+
+    return uploadData.url;
+  }, []);
+
   const generate = useCallback(async (numImages: number = 1) => {
-    if (!calibratedImageDataUrl || isGenerating) return;
+    if (!calibratedImageBlob || !calibratedImageDataUrl || isGenerating) return;
 
     setGenerating(true);
     setError(null);
     setProgressText('Görüntü yükleniyor...');
 
     try {
-      // Use the Data URL directly instead of a separate upload proxy
-      // since the canvas resolution is controlled and will be < 5MB
-      const imageUrl = calibratedImageDataUrl;
-
-      if (!imageUrl) throw new Error('Görüntü verisi bulunamadı.');
+      const imageUrl = await uploadCalibratedImage(calibratedImageBlob);
 
       // 2. Generate Prompt
       const prompt = buildPrompt(productForm, sceneStyle, customRequest);
@@ -93,6 +117,7 @@ export const useGeneration = () => {
   }, [
     addGeneratedImages,
     aspectRatio,
+    calibratedImageBlob,
     calibratedImageDataUrl,
     customRequest,
     isGenerating,
@@ -102,6 +127,7 @@ export const useGeneration = () => {
     sceneStyle,
     setError,
     setGenerating,
+    uploadCalibratedImage,
   ]);
 
   return { generate, progressText };
