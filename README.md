@@ -1,155 +1,90 @@
-# React + TypeScript + Vite
-
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
 # Tekstil AI Studio
 
-Tekstil AI Studio, tek bir urun fotografisini e-ticaret ve lifestyle sahnelerine donusturmek icin tasarlanmis bir React + Cloudflare Pages uygulamasidir. Akis; gorsel yukleme, beyaz dengesi kalibrasyonu, prompt tabanli sahne secimi ve Fal.ai uzerinden varyasyon uretiminden olusur.
+Tekstil AI Studio is an AI-assisted product photography workflow for textile e-commerce teams. It turns a single product photo into calibrated, scene-aware marketing visuals through a guided flow built with React on the frontend and Cloudflare Pages Functions on the backend.
 
-## Ozellikler
+## What It Does
 
-- Surukle-birak veya dosya secici ile urun fotografisi yukleme
-- Canvas tabanli zorunlu beyaz dengesi kalibrasyonu
-- Urun formu, sahne stili, oran ve cozumurluk secimi
-- Fal.ai proxy endpointleri uzerinden gorsel upload ve gorsel uretimi
-- Uretilen varyasyonlar icin oturum gecmisi ve indirme aksiyonlari
+- Upload a source product photo
+- Calibrate white balance from the brightest reference point
+- Choose product form, scene style, aspect ratio, and output quality
+- Upload the calibrated asset through a backend proxy
+- Generate e-commerce and lifestyle variations with Fal.ai
+- Review, download, and reuse generated outputs within the same session
 
-## Teknoloji Yigini
+## Product Workflow
 
-- React 19 + TypeScript
+1. Upload a product image.
+2. Calibrate the image by selecting a bright white or neutral point.
+3. Configure generation settings and review the generated prompt.
+4. Send the calibrated asset to the upload proxy.
+5. Submit the uploaded asset and prompt to the generation endpoint.
+6. Review generated images and download the preferred results.
+
+## Stack
+
+- React 19
+- TypeScript
 - Vite 8
 - Zustand
 - Tailwind CSS 4
 - Cloudflare Pages Functions
-- Fal.ai Nano Banana Pro image edit modeli
+- Fal.ai image generation APIs
 
-## Gelistirme Ortami
+## Local Development
 
-Gereksinimler:
+Requirements:
 
-- Node.js 20+
-- npm 10+
+- Node.js 20 or newer
+- npm 10 or newer
 
-Kurulum:
+Install dependencies:
 
 ```bash
 npm install
 ```
 
-Calistirma:
+Start the development server:
 
 ```bash
 npm run dev
 ```
 
-Kontroller:
+Run quality checks:
 
 ```bash
 npm run lint
 npm run build
 ```
 
-## Ortam Degiskenleri
+## Environment
 
-Cloudflare Pages tarafinda asagidaki secret tanimli olmalidir:
+The backend requires the following secret in Cloudflare Pages:
 
-- `FAL_KEY`: Fal.ai API anahtari
+- `FAL_KEY`: Fal.ai API key used by the Pages Functions proxies
 
-Yerelde sadece arayuz gelistirilecekse `npm run dev` yeterlidir. Pages Functions ile tam akisi denemek icin Cloudflare Pages / Wrangler ortami kullanilmalidir.
+For local frontend-only iteration, `npm run dev` is enough. For end-to-end testing of upload and generation flows, run the project in a Cloudflare Pages-compatible environment with `FAL_KEY` configured.
 
-## Uygulama Akisi
-
-1. Kullanici urun fotografisini yukler.
-2. En acik renk noktasina tiklayarak beyaz dengesi kalibrasyonu yapar.
-3. Sahne parametrelerini secer ve prompt onizlemesini gorur.
-4. Kalibre edilmis gorsel once `/api/upload`, sonra prompt ile birlikte `/api/generate` endpointine gider.
-5. Uretilen gorseller grid ve oturum gecmisi olarak sunulur.
-
-## Proje Yapisi
+## Repository Structure
 
 ```text
 src/
-  components/   Arayuz adimlari ve ortak UI bilesenleri
-  constants/    Prompt ve endpoint sabitleri
-  hooks/        Generation akisi
-  store/        Zustand uygulama durumu
-  utils/        Kalibrasyon ve dosya yardimcilari
+  components/   Step-based UI and shared interface pieces
+  constants/    Prompt and endpoint configuration
+  hooks/        Generation flow orchestration
+  store/        Zustand application state
+  utils/        Calibration and file helpers
 functions/api/
   generate.ts   Fal.ai generation proxy
   upload.ts     Fal CDN upload proxy
 ```
 
-## Deploy
+## Deployment Notes
 
-- `wrangler.toml` Cloudflare Pages cikti klasoru olarak `dist` kullanir.
-- Uygulamayi deploy etmeden once `npm run build` komutunun temiz gectigini dogrulayin.
-- `FAL_KEY` secret'i Cloudflare dashboard uzerinden eklenmelidir; frontend koduna yazilmamalidir.
+- Production assets are built into `dist/`.
+- `wrangler.toml` is configured for Cloudflare Pages deployment.
+- `FAL_KEY` must stay server-side and must not be exposed to the frontend.
+- GitHub Actions CI runs `npm ci`, `npm run lint`, and `npm run build` for pull requests and pushes to `main`.
+
+## Current Scope
+
+This repository currently focuses on the image preparation and generation workflow. It does not yet include catalog management, user authentication, billing, or production analytics.
